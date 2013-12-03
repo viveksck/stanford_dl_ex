@@ -29,6 +29,11 @@ assert(all(isfield(options,{'epochs','alpha','minibatch'})),...
 if ~isfield(options,'momentum')
     options.momentum = 0.9;
 end;
+
+if ~isfield(options, 'enhanced')
+    options.enhanced = false;
+end
+
 epochs = options.epochs;
 alpha = options.alpha;
 minibatch = options.minibatch;
@@ -37,6 +42,15 @@ m = length(labels); % training set size
 mom = 0.5;
 momIncrease = 20;
 velocity = zeros(size(theta));
+UpdateThetaAndVelocity = @UpdateThetaAndVelocityBasic;
+UpdateAlpha = @UpdateAlphaBasic;
+
+
+if options.enhanced
+    C = options.C;
+    G = options.G;
+    add_noise = options.add_noise;
+end
 
 %%======================================================================
 %% SGD loop
@@ -64,19 +78,27 @@ for e = 1:epochs
         % gradient evaluated above scaled by the learning rate.
         % Then update the current weights theta according to the
         % sgd update rule
-
-        velocity = (alpha * grad) + (mom * velocity);
-        theta = theta - velocity;
-        %%% YOUR CODE HERE %%%
+        [theta, velocity] = UpdateThetaAndVelocity(alpha, grad, mom,...
+            velocity, theta, options);
         
         fprintf('Epoch %d: Cost on iteration %d is %f\n',e,it,cost);
     end;
 
     % aneal learning rate by factor of two after each epoch
-    alpha = alpha/2.0;
+    alpha = UpdateAlpha(alpha, e, options);
 
 end;
 
 opttheta = theta;
 
+
+end
+
+function [theta, velocity] = UpdateThetaAndVelocityBasic(alpha, grad, mom, oldvel, oldtheta, options)
+velocity = (alpha * grad) + (mom * oldvel);
+theta = oldtheta - velocity;
+end
+
+function [alpha] = UpdateAlphaBasic(old_alpha, epoch_no, options)
+alpha = old_alpha/2.0;
 end
