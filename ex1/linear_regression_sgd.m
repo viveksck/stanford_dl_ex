@@ -35,17 +35,17 @@ m=size(train.X,2);
 n=size(train.X,1);
 
 % Initialize the coefficient vector theta to random values.
-theta = rand(n,1);
+theta = [  37.0765   -0.0906    0.0536    0.0281    4.1228  -18.7751    4.0243   -0.0080   -1.7175  0.3299   -0.0140   -0.9485    0.0090   -0.5133]';
 
 % Run the minFunc optimizer with linear_regression.m as the objective.
-%
-% TODO:  Implement the linear regression objective and gradient computations
-% in linear_regression.m
-%
+%;
 tic;
-options.epochs = 1000;
+options.epochs = 100;
 options.alpha = 1e-6;
 options.minibatch = 1;
+options.enhanced = 1;
+options.C = 47.0;
+options.G = 1e6;
 theta = minFuncSGD(@SGDTestLossfunc, theta, train.X, train.y, @SGDTestGetBatchEx, options);
 fprintf('Optimization took %f seconds.\n', toc);
 

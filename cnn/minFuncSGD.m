@@ -44,12 +44,9 @@ momIncrease = 20;
 velocity = zeros(size(theta));
 UpdateThetaAndVelocity = @UpdateThetaAndVelocityBasic;
 UpdateAlpha = @UpdateAlphaBasic;
-
-
 if options.enhanced
-    C = options.C;
-    G = options.G;
-    add_noise = options.add_noise;
+    UpdateThetaAndVelocity = @UpdateThetaAndVelocityEx;
+    UpdateAlpha = @UpdateAlphaEx;
 end
 
 %%======================================================================
@@ -73,7 +70,6 @@ for e = 1:epochs
 
         % evaluate the objective function on the next minibatch
         [cost ,grad] = funObj(theta,mb_data,mb_labels);
-        
         % Instructions: Add in the weighted velocity vector to the
         % gradient evaluated above scaled by the learning rate.
         % Then update the current weights theta according to the
@@ -85,7 +81,7 @@ for e = 1:epochs
     end;
 
     % aneal learning rate by factor of two after each epoch
-    alpha = UpdateAlpha(alpha, e, options);
+    alpha = UpdateAlpha(alpha, epochs, options);
 
 end;
 
@@ -102,3 +98,21 @@ end
 function [alpha] = UpdateAlphaBasic(old_alpha, epoch_no, options)
 alpha = old_alpha/2.0;
 end
+
+function [theta, velocity] = UpdateThetaAndVelocityEx(alpha, grad, ...
+                             mom, oldvel, oldtheta, options)
+velocity = (alpha * grad) + (mom * oldvel);
+theta = oldtheta - velocity;
+% Perform max norm regularizations. Constrain the weights to be present
+% to a ball of radius C if they ever exceed C
+if (norm(theta) >= options.C)
+    theta = (theta/norm(theta)) * options.C;
+end
+end
+
+function [alpha] = UpdateAlphaEx(old_alpha, epochs, options)
+%TODO: Check if alpha has to be adaptive.
+%alpha = options.C/(options.G * sqrt(epochs));
+alpha = old_alpha/2.0;
+end
+
