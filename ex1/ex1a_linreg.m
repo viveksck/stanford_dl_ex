@@ -44,6 +44,7 @@ theta = rand(n,1);
 %
 tic;
 options = struct('MaxIter', 200);
+options.useMex = 0
 theta = minFunc(@linear_regression, theta, options, train.X, train.y);
 fprintf('Optimization took %f seconds.\n', toc);
 
